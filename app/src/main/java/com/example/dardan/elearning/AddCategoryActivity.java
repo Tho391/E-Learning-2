@@ -22,9 +22,7 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import static com.example.dardan.elearning.Ultis.getUniqueName;
 import static com.example.dardan.elearning.Ultis.putToSharePreferences;
-import static com.example.dardan.elearning.Ultis.saveToInternalStorage;
 
 public class AddCategoryActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -107,14 +105,14 @@ public class AddCategoryActivity extends AppCompatActivity implements View.OnCli
                     //add title & image to category
                     newCategory.setTitle(name);
                     Bitmap bitmap = ((BitmapDrawable) btnImage.getDrawable()).getBitmap();
-                    String imagePath = saveToInternalStorage(this,bitmap,getUniqueName());
-                    newCategory.setImagePath(imagePath);
+                    //save bitmap to temImage
+                    //after user finish create -> save tempImage to storage
+                    //String imagePath = saveToInternalStorage(this,bitmap,getUniqueName());
+                    newCategory.setTempImage(bitmap);
 
                     //start add thing activity
                     Intent intent = new Intent(this, AddThingsActivity.class);
                     //intent.putExtra(CATEGORY, newCategory);
-                    //put to share preference
-                    //SharedPreferences mPrefs = getSharedPreferences(SHARE_PREFERENCES,MODE_PRIVATE);
                     putToSharePreferences(this, CATEGORY, newCategory);
                     //startActivity(intent);
                     startActivityForResult(intent, CLOSE_CODE);
@@ -130,7 +128,6 @@ public class AddCategoryActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void getImageFromLibraryOrCamera() {
-        //todo dung dialog
 
         String[] items = new String[]{"From Library", "From Camera"};
         AlertDialog singleChoice = new AlertDialog.Builder(this)

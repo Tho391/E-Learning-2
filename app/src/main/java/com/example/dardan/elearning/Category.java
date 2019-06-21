@@ -1,5 +1,7 @@
 package com.example.dardan.elearning;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -15,6 +17,16 @@ public class Category implements Serializable {
     private int color;
     private int theme;
     private ArrayList<Thing> things = new ArrayList<>();
+
+    private Bitmap tempImage;
+
+    public Bitmap getTempImage() {
+        return tempImage;
+    }
+
+    public void setTempImage(Bitmap tempImage) {
+        this.tempImage = tempImage;
+    }
 
     public Category(int id, String title, String imagePath, int highScore, int color, int theme, ArrayList<Thing> things) {
         this.id = id;

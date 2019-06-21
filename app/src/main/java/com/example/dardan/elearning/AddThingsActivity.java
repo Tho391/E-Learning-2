@@ -1,12 +1,14 @@
 package com.example.dardan.elearning;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -40,6 +42,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     private ImageButton leftButton;
     private ImageView thingImage;
     private TextView thingName;
+    private TextView totalObject;
     private ImageButton audioButton;
     private ImageButton addButton;
     private int currenIndex = 0;
@@ -72,6 +75,8 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void findView() {
+        totalObject = findViewById(R.id.total_object);
+
         thingName = findViewById(R.id.thingName);
         thingImage = findViewById(R.id.thingImage);
 
@@ -131,6 +136,8 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(this, thingName.getText() + " added", Toast.LENGTH_LONG).show();
                     //reset title & image to default_cate
                     resetThingActivity();
+                    //update total object
+                    totalObject.setText("Total: "+ category.getThings().size());
                 }
             }
             break;
@@ -176,10 +183,13 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void saveThing() {
+        Thing thing = new Thing();
+
         String thingName = this.thingName.getText().toString();
         Bitmap thingImage = ((BitmapDrawable) this.thingImage.getDrawable()).getBitmap();
-        String imagePath = saveToInternalStorage(this,thingImage,getUniqueName());
-        Thing thing = new Thing(thingName, imagePath);
+
+        thing.setText(thingName);
+        thing.setTempImage(thingImage);
         //currentThing = thing;
         category.getThings().add(thing);
     }
@@ -203,16 +213,11 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
         switch (item.getItemId()) {
             case R.id.save_category: {
                 if (category.getThings().size() > 0) {
-                    //todo save category
+                    //save tempImage to storage
+                    //add category to database
+                    SaveToStorageTask saveToStorageTask = new SaveToStorageTask(getApplicationContext());
+                    saveToStorageTask.execute();
 
-                    db.addCategory(category);
-                    //set result code
-                    Intent returnIntent = new Intent();
-                    setResult(Activity.RESULT_OK, returnIntent);
-                    finish();
-
-                    //deleteSharedPreferences(CATEGORY);
-                    Toast.makeText(this, category.getTitle() + " category added", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You have not add any objects!", Toast.LENGTH_LONG).show();
             }
@@ -221,6 +226,37 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+    private class SaveToStorageTask extends AsyncTask<Void,Void,Void>{
+        private Context context;
+        public SaveToStorageTask(Context context){
+            this.context = context;
+        }
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //save category image
+            String imagePath = saveToInternalStorage(context,category.getTempImage(),getUniqueName());
+            category.setImagePath(imagePath);
+            //save things image
+            for (Thing i:category.getThings()) {
+                String path = saveToInternalStorage(context,i.getTempImage(),getUniqueName());
+                i.setImagePath(path);
+            }
+            db.addCategory(category);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //super.onPostExecute(aVoid);
+            //set result code
+            Intent returnIntent = new Intent();
+            setResult(Activity.RESULT_OK, returnIntent);
+            finish();
+
+            //deleteSharedPreferences(CATEGORY);
+            Toast.makeText(context, category.getTitle() + " category added", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

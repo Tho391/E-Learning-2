@@ -17,7 +17,7 @@
         android:layout_marginBottom="5dp"
         android:padding="5dp"
         android:background="@color/primary_light"
-        android:scaleType="centerInside"
+        android:scaleType="centerCrop"
         android:src="@drawable/orange" />
 
     <TextView

@@ -16,7 +16,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     //region database sqlite
     //database
-    private static final String DATABASE_NAME = "e_learning.db";
+    private static final String DATABASE_NAME = "e_learning_app.db";
     private static final int DATABASE_VERSION = 1;
     //common column
     private static final String COLUMN_ID = "_id";
@@ -223,6 +223,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             category.setId(cursor.getInt(0));
             category.setTitle(cursor.getString(1));
             category.setImagePath(cursor.getString(2));
+            //category.setImagePath(cursor.getBlob(2));
             category.setHighScore(cursor.getInt(3));
             category.setColor(cursor.getInt(4));
             category.setTheme(cursor.getInt(5));

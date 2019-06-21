@@ -1,5 +1,7 @@
 package com.example.dardan.elearning;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 
 /**
@@ -7,8 +9,18 @@ import java.io.Serializable;
  */
 public class Thing implements Serializable {
     private int id;
-    private String text;
-    private String imagePath;
+    private String text="";
+    private String imagePath="";
+
+    private Bitmap tempImage;
+
+    public Bitmap getTempImage() {
+        return tempImage;
+    }
+
+    public void setTempImage(Bitmap tempImage) {
+        this.tempImage = tempImage;
+    }
 
     public Thing(int id, String text, String imagePath, int categoryId) {
         this.id = id;

@@ -99,6 +99,7 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
     protected void onStart() {
         super.onStart();
         updateCategory();
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -107,7 +108,7 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         //hàm này là update high score cho mỗi category
         //updateHighscores();
         updateCategory();
-
+        invalidateOptionsMenu();
     }
 
     private void updateCategory() {
@@ -120,6 +121,13 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
                 categories = list;
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -164,7 +172,7 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
                     }
                 }.execute();
             }
-        } else
+        } else {
             for (Category c : categories) {
                 if (item.getItemId() == c.getId()) {
                     intent.putExtra("position", categories.indexOf(c));
@@ -172,6 +180,7 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
                     return true;
                 }
             }
+        }
 
 
         //lấy title của menu => id của category => truyền sang activity quiz
