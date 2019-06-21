@@ -22,7 +22,9 @@ import android.widget.Toast;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import static com.example.dardan.elearning.Ulti.putToSharePreferences;
+import static com.example.dardan.elearning.Ultis.getUniqueName;
+import static com.example.dardan.elearning.Ultis.putToSharePreferences;
+import static com.example.dardan.elearning.Ultis.saveToInternalStorage;
 
 public class AddCategoryActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -48,7 +50,7 @@ public class AddCategoryActivity extends AppCompatActivity implements View.OnCli
         setTitle("Add Category");
         findView();
         //create default_cate category
-        newCategory = new Category(this);
+        newCategory = new Category();
 
         //create alert dialog
         createDialog();
@@ -103,9 +105,10 @@ public class AddCategoryActivity extends AppCompatActivity implements View.OnCli
                     edtTitle.setError("Please fill in the title for this category!");
                 } else {
                     //add title & image to category
-                    newCategory.title = name;
+                    newCategory.setTitle(name);
                     Bitmap bitmap = ((BitmapDrawable) btnImage.getDrawable()).getBitmap();
-                    newCategory.image = bitmap;
+                    String imagePath = saveToInternalStorage(this,bitmap,getUniqueName());
+                    newCategory.setImagePath(imagePath);
 
                     //start add thing activity
                     Intent intent = new Intent(this, AddThingsActivity.class);

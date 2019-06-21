@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.tts.TextToSpeech;
@@ -34,15 +35,17 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
     private int position;
     TextToSpeech tts;
 
+    private int currentIndex = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();//return the intent that started this activity
         position = intent.getIntExtra("position", 0);
         currentCategory = CategoriesActivity.categories.get(position);
-        currentCategory.currentIndex = 0;
+        currentIndex = 0;
         //currentCategory.goToFirstThing();
-        currentThing = currentCategory.currentThing();
-        setTheme(currentCategory.theme);
+        currentThing = currentCategory.getThings().get(currentIndex);
+        setTheme(currentCategory.getTheme());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_things);
@@ -60,7 +63,6 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
         rightButton.setOnClickListener(this);
         leftButton.setOnClickListener(this);
         audioButton.setOnClickListener(this);
-        mainPicture.setOnClickListener(this);
         quizButton.setOnClickListener(this);
 
 
@@ -85,6 +87,12 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        tts.shutdown();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         // it is considered good practice to release the Media Player object
@@ -103,29 +111,23 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonLeftThing:
-                if (currentCategory.prevThing() != null) {
-                    currentThing = currentCategory.prevThing();
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    currentThing = currentCategory.getThings().get(currentIndex);
                     updateResources();
                 }
                 break;
             case R.id.buttonRightThing:
-                if (currentCategory.nextThing() != null) {
-                    currentThing = currentCategory.nextThing();
+                if (currentIndex < currentCategory.getThings().size() - 1) {
+                    currentIndex++;
+                    currentThing = currentCategory.getThings().get(currentIndex);
                     updateResources();
                 }
                 break;
             case R.id.buttonAudioThing: {
-                //playSound(currentThing.getSound());
-
+                //playSound(currentThing.getSound());\
                 playSound();
-
-            }
-            break;
-            case R.id.thingImage:
-                if (currentThing.hasNoise()) {
-                    playSound(currentThing.getNoise());
-                }
-                break;
+            }break;
             case R.id.buttonQuiz:
                 //Intent previousIntent = getIntent();
                 //int position = previousIntent.getIntExtra("position", 0);
@@ -148,23 +150,16 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
      * current Category and Thing
      */
     protected void updateResources() {
-        rightButton.setVisibility(currentCategory.hasNextThing() ? View.VISIBLE : View.INVISIBLE);
-        leftButton.setVisibility(currentCategory.hasPrevThing() ? View.VISIBLE : View.INVISIBLE);
-
-        try {
-            if (currentThing.hasNoise()) {
-                playSound(currentThing.getNoise());
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    public void onCompletion(MediaPlayer player) {
-                        player.reset();
-                        playSound(currentThing.getSound());
-                    }
-                });
-            } else
-                playSound(currentThing.getSound());
-        } catch (Exception e) {
-            e.getMessage();
+        int right = currentCategory.getThings().size() - 1;
+        if (currentIndex == 0) {
+            leftButton.setVisibility(View.INVISIBLE);
+        } else if (currentIndex == right) {
+            rightButton.setVisibility(View.INVISIBLE);
+        } else {
+            leftButton.setVisibility(View.VISIBLE);
+            rightButton.setVisibility(View.VISIBLE);
         }
+
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = this.getTheme(); //gets the current Theme
 
@@ -183,14 +178,12 @@ public class ThingsActivity extends AppCompatActivity implements View.OnClickLis
         mainPicture.setBackgroundColor(primaryLightColor);
         relativeLayout.setBackgroundColor(primaryLightColor);
         mainName.setBackgroundColor(primaryLightColor);
-        setTitle(currentCategory.title);
+        setTitle(currentCategory.getTitle());
 
         // make the picture Invisible and then Visible to add some animation
         mainPicture.setVisibility(View.INVISIBLE);
-        //mainPicture.setImageResource(currentThing.getImage());
-        if (currentThing.getImage() != null)
-            mainPicture.setImageBitmap(currentThing.getImage());
 
+        mainPicture.setImageURI(Uri.parse(currentThing.getImagePath()));
 
         mainPicture.setVisibility(View.VISIBLE);
         quizButton.setImageResource(R.drawable.ic_face_blue);

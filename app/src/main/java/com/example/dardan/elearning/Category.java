@@ -3,11 +3,15 @@ package com.example.dardan.elearning;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import static com.example.dardan.elearning.Ultis.COLORS;
+import static com.example.dardan.elearning.Ultis.THEMES;
+import static com.example.dardan.elearning.Ultis.getRandom;
+
 public class Category implements Serializable {
     private int id;
     private String title;
     private String imagePath;
-    private int highScore;
+    private int highScore = 0;
     private int color;
     private int theme;
     private ArrayList<Thing> things = new ArrayList<>();
@@ -23,7 +27,18 @@ public class Category implements Serializable {
     }
 
     public Category() {
+        highScore = 0;
+        color = getRandom(COLORS);
+        theme = getRandom(THEMES);
+    }
 
+    public Category(String title, String imagePath, ArrayList<Thing> things) {
+        this.title = title;
+        this.imagePath = imagePath;
+        highScore = 0;
+        color = getRandom(COLORS);
+        theme = getRandom(THEMES);
+        this.things = things;
     }
 
     public int getId() {

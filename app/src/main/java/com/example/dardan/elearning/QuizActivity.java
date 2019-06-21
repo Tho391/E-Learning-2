@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -65,13 +66,13 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = getIntent();//return the intent that started this activity
         int position = intent.getIntExtra("position", 0);
         currentCategory = CategoriesActivity.categories.get(position);
-        setTheme(currentCategory.theme);
+        setTheme(currentCategory.getTheme());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true); // back button
 
-        things = currentCategory.getListOfThings();
+        things = currentCategory.getThings();
         relativeLayout = findViewById(R.id.quizLayout);
         mainPicture = findViewById(R.id.quizImage);
 
@@ -135,7 +136,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
 //                Toast.makeText(this, "New Highscore!", Toast.LENGTH_LONG).show();
 //            Highscores.close();
 
-            mySQLiteHelper.updateHighScore(currentCategory.title,score);
+            mySQLiteHelper.updateHighScore(currentCategory.getTitle(),score);
             this.finish();
 
             return;
@@ -168,7 +169,7 @@ public class QuizActivity extends AppCompatActivity implements View.OnClickListe
         thingAnswer = things.get(answers[index]);
 
         mainPicture.setVisibility(View.INVISIBLE);
-        mainPicture.setImageBitmap(thingAnswer.getImage());
+        mainPicture.setImageURI(Uri.parse(thingAnswer.getImagePath()));
         mainPicture.setVisibility(View.VISIBLE);
 
         createEdAnswer(thingAnswer.getText());

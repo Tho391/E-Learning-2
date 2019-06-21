@@ -1,6 +1,7 @@
 package com.example.dardan.elearning;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +33,12 @@ public class CustomCategoryAdapter extends ArrayAdapter<Category> {
         RelativeLayout categoryLayout = convertView.findViewById(R.id.cardLayout);
 
         // Populate the data into the template view using the data object
-        categoryTitle.setText(category.title);
-        categoryHighscore.setText("Highscore: " + category.highScore);
+        categoryTitle.setText(category.getTitle());
+        categoryHighscore.setText("Highscore: " + category.getHighScore());
         //categoryImage.setImageResource(Integer.parseInt(category.image));
-        categoryLayout.setBackgroundColor(category.color);
+        categoryLayout.setBackgroundColor(category.getColor());
 
-        categoryImage.setImageBitmap(category.image);
+        categoryImage.setImageURI(Uri.parse(category.getImagePath()));
 
         // Return the completed view to render on screen
         return convertView;

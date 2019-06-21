@@ -9,17 +9,20 @@ public class Thing implements Serializable {
     private int id;
     private String text;
     private String imagePath;
-    private int categoryId;
 
     public Thing(int id, String text, String imagePath, int categoryId) {
         this.id = id;
         this.text = text;
         this.imagePath = imagePath;
-        this.categoryId = categoryId;
     }
 
     public Thing() {
 
+    }
+
+    public Thing(String text, String imagePath) {
+        this.text = text;
+        this.imagePath=imagePath;
     }
 
     public int getId() {
@@ -44,13 +47,5 @@ public class Thing implements Serializable {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
     }
 }

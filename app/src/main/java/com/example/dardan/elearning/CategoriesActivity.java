@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,11 +26,14 @@ import java.util.List;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class CategoriesActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, EasyPermissions.PermissionCallbacks, AdapterView.OnItemLongClickListener {
+import static com.example.dardan.elearning.Ultis.getUrlFromDrawable;
+
+public class CategoriesActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, EasyPermissions.PermissionCallbacks, AdapterView.OnItemLongClickListener, View.OnClickListener {
     public static ArrayList<Category> categories;
     CustomCategoryAdapter adapter;
     ListView listView;
     MySQLiteHelper db;
+    FloatingActionButton addCategory;
     private static final String SHAREPREFERENCES_NAME = "firstTime";
     boolean firstTime = true;
 
@@ -50,6 +54,8 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
             }
         }
 
+        addCategory = findViewById(R.id.floatingActionButton);
+        addCategory.setOnClickListener(this);
 
         //kiểm tra có phải lần đầu mở app k
 //        SharedPreferences sharedPreferences= this.getSharedPreferences(SHAREPREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -71,7 +77,7 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         createAdapter();
     }
 
-    //todo sửa lại adapter
+
     private void createAdapter() {
         listView = findViewById(R.id.listViewCards);
         listView.setOnItemClickListener(this);
@@ -79,11 +85,13 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         listView.setOnItemLongClickListener(this);
         if (categories != null) {
             // Create the adapter to convert the array to views
-            adapter = new CustomCategoryAdapter(this, categories);
             // Attach the adapter to a ListView
-
+            adapter = new CustomCategoryAdapter(this, categories);
             listView.setAdapter(adapter);
-
+        } else {
+            categories = new ArrayList<>();
+            adapter = new CustomCategoryAdapter(this, categories);
+            listView.setAdapter(adapter);
         }
     }
 
@@ -95,8 +103,6 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
 
     @Override
     protected void onResume() {
-
-
         super.onResume();
         //hàm này là update high score cho mỗi category
         //updateHighscores();
@@ -106,12 +112,13 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
 
     private void updateCategory() {
         ArrayList<Category> list = db.getAllCategory();
-        if (categories != null) {
-            categories.clear();
-            if (list != null)
+        if (list != null) {
+            if (categories != null) {
+                categories.clear();
                 categories.addAll(list);
-            if (categories != null)
-                adapter.notifyDataSetChanged();
+            } else
+                categories = list;
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -120,60 +127,46 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_quiz, menu);
 
-        //add item to option menu
-//        try{
-//        for (Category c: categories) {
-//            menu.getItem(1).getSubMenu().add(c.title);
-//        }
-//        }catch (Exception e){
-//            e.getMessage();
-//        }
-
-        MenuItem menuItem = menu.getItem(2);
+        MenuItem menuItem = menu.getItem(1);
         SubMenu quizMenu = menuItem.getSubMenu();
         quizMenu.clear();
         //SubMenu quizMenu = menu.addSubMenu("Quiz");
         if (categories != null)
             for (Category c : categories) {
-                quizMenu.addSubMenu(0, c.id, c.id, c.title);
+                quizMenu.addSubMenu(0, c.getId(), c.getId(), c.getTitle());
             }
 
 
         return true;
     }
 
-    //todo set value thành id cho category
-    //todo sửa menu thành list
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent intent = new Intent(this, QuizActivity.class);
 
         if (item.getItemId() == R.id.add_default) {
             //createDefaultData();
-            if (db.getCategoryCount() < 1)
-                Toast.makeText(this, "Creating...", Toast.LENGTH_LONG).show();
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    createDefaultData();
-                    return null;
-                }
+            if (db.getCategoryCount() < 1) {
+                Toast.makeText(this, "Creating...", Toast.LENGTH_SHORT).show();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        createDefaultCategory();
+                        return null;
+                    }
 
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    //super.onPostExecute(aVoid);
-                    //categories= db.getAllCategory();
-                    toast("Done");
-                    updateCategory();
-                }
-            }.execute();
-        } else if (item.getItemId() == R.id.add_category) {
-            Intent intent1 = new Intent(this, AddCategoryActivity.class);
-            startActivity(intent1);
-            return true;
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        //super.onPostExecute(aVoid);
+                        //categories= db.getAllCategory();
+                        toast("Done");
+                        updateCategory();
+                    }
+                }.execute();
+            }
         } else
             for (Category c : categories) {
-                if (item.getItemId() == c.id) {
+                if (item.getItemId() == c.getId()) {
                     intent.putExtra("position", categories.indexOf(c));
                     startActivity(intent);
                     return true;
@@ -186,10 +179,6 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
 //        int id = category.id;
 //        intent.putExtra("position",id);
         return true;
-    }
-
-    private void createDefaultData() {
-        db.createDefaultCategory();
     }
 
     private void populateCategoriesList() {
@@ -298,17 +287,6 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         listView = (ListView) findViewById(R.id.listViewCards);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
-    }
-
-    private void updateHighscores() {
-        Highscores.open(this);
-        for (Category c : categories) {
-            c.updateHighscore();
-        }
-        Highscores.close();
-        // notifies the adapter to display the latest Highscores
-        // actually this method calls getView from CustomCategoryAdapter class
-        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -427,4 +405,96 @@ public class CategoriesActivity extends AppCompatActivity implements AdapterView
         Toast.makeText(this, "Edit", Toast.LENGTH_LONG).show();
     }
 
+
+    //add default_cate category
+    public void createDefaultCategory() {
+
+        int count = db.getCategoryCount();
+        if (count == 0) {
+            String title = "Fruits";
+            String imagePath = getUrlFromDrawable(R.drawable.fruits).toString();
+            ArrayList<Thing> things = new ArrayList<>();
+            things.add(new Thing("Apple", getUrlFromDrawable(R.drawable.apple).toString()));
+            things.add(new Thing("Orange", getUrlFromDrawable(R.drawable.orange).toString()));
+            things.add(new Thing("Banana", getUrlFromDrawable(R.drawable.banana).toString()));
+            things.add(new Thing("Cherry", getUrlFromDrawable(R.drawable.cherry).toString()));
+            things.add(new Thing("Dates", getUrlFromDrawable(R.drawable.dates).toString()));
+            things.add(new Thing("Coconut", getUrlFromDrawable(R.drawable.coconut).toString()));
+            things.add(new Thing("Grape", getUrlFromDrawable(R.drawable.grape).toString()));
+            things.add(new Thing("Kiwi", getUrlFromDrawable(R.drawable.kiwi).toString()));
+            things.add(new Thing("Lemon", getUrlFromDrawable(R.drawable.lemon).toString()));
+            things.add(new Thing("Peach", getUrlFromDrawable(R.drawable.peach).toString()));
+            things.add(new Thing("Pear", getUrlFromDrawable(R.drawable.pear).toString()));
+            things.add(new Thing("Persimmon", getUrlFromDrawable(R.drawable.persimmon).toString()));
+            things.add(new Thing("Pineapple", getUrlFromDrawable(R.drawable.pineapple).toString()));
+            things.add(new Thing("Plum", getUrlFromDrawable(R.drawable.plum).toString()));
+            things.add(new Thing("Raspberry", getUrlFromDrawable(R.drawable.raspberry).toString()));
+            things.add(new Thing("Strawberry", getUrlFromDrawable(R.drawable.strawberry).toString()));
+            things.add(new Thing("Watermelon", getUrlFromDrawable(R.drawable.watermelon).toString()));
+            things.add(new Thing("Mango", getUrlFromDrawable(R.drawable.mango).toString()));
+
+            Category fruitCategory = new Category(title, imagePath, things);
+
+            db.addCategory(fruitCategory);
+
+            String animalsTitle = "Animals";
+            String animalsImage = getUrlFromDrawable(R.drawable.animals).toString();
+            ArrayList<Thing> animalsThings = new ArrayList<>();
+            animalsThings.add(new Thing("Dog", getUrlFromDrawable(R.drawable.dog).toString()));
+            animalsThings.add(new Thing("Bear", getUrlFromDrawable(R.drawable.bear).toString()));
+            animalsThings.add(new Thing("Wolf", getUrlFromDrawable(R.drawable.wolf).toString()));
+            animalsThings.add(new Thing("Dolphin", getUrlFromDrawable(R.drawable.dolphin).toString()));
+            animalsThings.add(new Thing("Duck", getUrlFromDrawable(R.drawable.duck).toString()));
+            animalsThings.add(new Thing("Leopard", getUrlFromDrawable(R.drawable.leopard).toString()));
+            animalsThings.add(new Thing("Lion", getUrlFromDrawable(R.drawable.lion).toString()));
+            animalsThings.add(new Thing("Monkey", getUrlFromDrawable(R.drawable.monkey).toString()));
+            animalsThings.add(new Thing("Penguin", getUrlFromDrawable(R.drawable.penguin).toString()));
+            animalsThings.add(new Thing("Rooster", getUrlFromDrawable(R.drawable.rooster).toString()));
+            animalsThings.add(new Thing("Sheep", getUrlFromDrawable(R.drawable.sheep).toString()));
+            animalsThings.add(new Thing("Snake", getUrlFromDrawable(R.drawable.snake).toString()));
+            animalsThings.add(new Thing("Tiger", getUrlFromDrawable(R.drawable.tiger).toString()));
+            animalsThings.add(new Thing("Fox", getUrlFromDrawable(R.drawable.fox).toString()));
+            animalsThings.add(new Thing("Camel", getUrlFromDrawable(R.drawable.camel).toString()));
+
+            Category animalCategory = new Category(animalsTitle, animalsImage, animalsThings);
+            db.addCategory(animalCategory);
+
+//            foodCategory.addThing(new Thing(R.drawable.bread, R.raw.bread, "Bread"));
+//            foodCategory.addThing(new Thing(R.drawable.burger, R.raw.burger, "Burger"));
+//            foodCategory.addThing(new Thing(R.drawable.cheese, R.raw.cheese, "Cheese"));
+//            foodCategory.addThing(new Thing(R.drawable.chocolate, R.raw.chocolate, "Chocolate"));
+//            foodCategory.addThing(new Thing(R.drawable.coffee, R.raw.coffee, "Coffee"));
+//            foodCategory.addThing(new Thing(R.drawable.egg, R.raw.egg, "Egg"));
+//            foodCategory.addThing(new Thing(R.drawable.honey, R.raw.honey, "Honey"));
+//            foodCategory.addThing(new Thing(R.drawable.hotdog, R.raw.hotdog, "Hot Dog"));
+//            foodCategory.addThing(new Thing(R.drawable.icecream, R.raw.icecream, "Ice Cream"));
+//            foodCategory.addThing(new Thing(R.drawable.meat, R.raw.meat, "Meat"));
+//            foodCategory.addThing(new Thing(R.drawable.pizza, R.raw.pizza, "Pizza"));
+//            foodCategory.addThing(new Thing(R.drawable.sandwich, R.raw.sandwich, "Sandwich"));
+//            foodCategory.addThing(new Thing(R.drawable.sausage, R.raw.sausage, "Sausage"));
+//            foodCategory.addThing(new Thing(R.drawable.water, R.raw.water, "Water"));
+//
+//            colorsCategory.addThing(new Thing(R.drawable.blue, R.raw.blue, "Blue"));
+//            colorsCategory.addThing(new Thing(R.drawable.pink, R.raw.pink, "Pink"));
+//            colorsCategory.addThing(new Thing(R.drawable.green, R.raw.green, "Green"));
+//            colorsCategory.addThing(new Thing(R.drawable.orange_color, R.raw.orange_color, "Orange"));
+//            colorsCategory.addThing(new Thing(R.drawable.purple, R.raw.purple, "Purple"));
+//            colorsCategory.addThing(new Thing(R.drawable.red, R.raw.red, "Red"));
+//            colorsCategory.addThing(new Thing(R.drawable.yellow, R.raw.yellow, "Yellow"));
+//            colorsCategory.addThing(new Thing(R.drawable.brown, R.raw.brown, "Brown"));
+//            colorsCategory.addThing(new Thing(R.drawable.gray, R.raw.gray, "Gray"));
+//            colorsCategory.addThing(new Thing(R.drawable.white, R.raw.white, "White"));
+//            colorsCategory.addThing(new Thing(R.drawable.black, R.raw.black, "Black"));
+
+        }
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.floatingActionButton) {
+            Intent intent1 = new Intent(this, AddCategoryActivity.class);
+            startActivity(intent1);
+        }
+    }
 }

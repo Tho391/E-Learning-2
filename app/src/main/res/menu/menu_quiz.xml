@@ -7,11 +7,6 @@
         android:title="create"
         app:showAsAction="always" />
     <item
-        android:id="@+id/add_category"
-        android:icon="@drawable/round_add_24"
-        android:title="add"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/quiz_title"
         android:icon="@drawable/ic_face_white"
         android:title="Quizzes"

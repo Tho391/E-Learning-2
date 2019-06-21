@@ -5,13 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import java.util.ArrayList;
-
-import static com.example.dardan.elearning.Ulti.BitmapToByte;
-import static com.example.dardan.elearning.Ulti.ByteToBitmap;
 
 /**
  * Created by Dardan on 11/17/2016.
@@ -33,7 +28,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TITLE = "title";
     //table thing and it's columns
     private static final String TABLE_THING = "thing";
-    private static final String COLUMN_IMAGEPATH = "imagePath";
+    private static final String COLUMN_IMAGEPATH = "image";
     private static final String COLUMN_TEXT = "text";
     private static final String COLUMN_CATEGORY_ID = "categoryId";
     //create table category
@@ -42,7 +37,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     + "( "
                     + COLUMN_ID + " integer primary key autoincrement,"
                     + COLUMN_TITLE + " text,"
-                    + COLUMN_IMAGEPATH + " BLOB,"
+                    + COLUMN_IMAGEPATH + " text,"
                     + COLUMN_HIGHSCORE + " integer,"
                     + COLUMN_COLOR + " integer,"
                     + COLUMN_THEME + " integer"
@@ -54,7 +49,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     + "( "
                     + COLUMN_ID + " integer primary key autoincrement,"
                     + COLUMN_TEXT + " text,"
-                    + COLUMN_IMAGEPATH + " BLOB,"
+                    + COLUMN_IMAGEPATH + " text,"
                     + COLUMN_CATEGORY_ID + " integer"
                     + ");";
     private static final String[] CATEGORY_TABLE_COLUMNS = {
@@ -69,12 +64,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             COLUMN_TEXT,
             COLUMN_IMAGEPATH,
             COLUMN_CATEGORY_ID};
-
-    private static final int[] COLORS = {R.color.primary, R.color.primary_dark, R.color.primary_light,
-            R.color.blue_primary, R.color.blue_primary_dark, R.color.blue_primary_light,
-            R.color.pink_primary, R.color.pink_primary_dark, R.color.pink_primary_light,
-            R.color.purple_primary, R.color.purple_primary_dark, R.color.pink_primary_light};
-    private static final int[] THEMES = {R.style.GreenTheme, R.style.BlueTheme, R.style.PinkTheme, R.style.PurpleTheme};
     //endregion
 
 
@@ -94,85 +83,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_THING);
 
         onCreate(db);
-    }
-
-    //add default_cate category
-    public void createDefaultCategory() {
-        //byte[] fruitsImage = BitmapToByte(bmp);
-
-        int count = getCategoryCount();
-        if (count == 0) {
-            Bitmap fruitsImage = BitmapFactory.decodeResource(context.getResources(), R.drawable.fruits);
-            Category fruitCategory = new Category("Fruits", fruitsImage, 0, COLORS[6], THEMES[1]);
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.apple), String.valueOf(R.raw.apple), "Apple", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.orange), String.valueOf(R.raw.orange), "Orange", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.banana), String.valueOf(R.raw.banana), "Banana", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.cherry), String.valueOf(R.raw.cherry), "Cherry", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.dates), String.valueOf(R.raw.dates), "Dates", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.coconut), String.valueOf(R.raw.coconut), "Coconut", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.grape), String.valueOf(R.raw.grape), "Grape", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.kiwi), String.valueOf(R.raw.kiwi), "Kiwi", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.lemon), String.valueOf(R.raw.lemon), "Lemon", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.peach), String.valueOf(R.raw.peach), "Peach", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.pear), String.valueOf(R.raw.pear), "Pear", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.persimmon), String.valueOf(R.raw.persimmon), "Persimmon", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.pineapple), String.valueOf(R.raw.pineapple), "Pineapple", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.plum), String.valueOf(R.raw.plum), "Plum", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.raspberry), String.valueOf(R.raw.raspberry), "Raspberry", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.strawberry), String.valueOf(R.raw.strawberry), "Strawberry", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.watermelon), String.valueOf(R.raw.watermelon), "Watermelon", "0"));
-            fruitCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.mango), String.valueOf(R.raw.mango), "Mango", "0"));
-
-            addCategory(fruitCategory);
-
-            Bitmap animalImage = BitmapFactory.decodeResource(context.getResources(), R.drawable.animals);
-            Category animalCategory = new Category("Animals", animalImage, 0, COLORS[4], THEMES[2]);
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.dog), String.valueOf(R.raw.dog), "Dog", R.raw.dognoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.bear), String.valueOf(R.raw.bear), "Bear", R.raw.bearnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.wolf), String.valueOf(R.raw.wolf), "Wolf", R.raw.wolfnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.dolphin), String.valueOf(R.raw.dolphin), "Dolphin", R.raw.dolphinnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.duck), String.valueOf(R.raw.duck), "Duck", R.raw.ducknoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.leopard), String.valueOf(R.raw.leopard), "Leopard", R.raw.leopardnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.lion), String.valueOf(R.raw.lion), "Lion", R.raw.lionnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.monkey), String.valueOf(R.raw.monkey), "Monkey", R.raw.monkeynoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.penguin), String.valueOf(R.raw.penguin), "Penguin", R.raw.penguinnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.rooster), String.valueOf(R.raw.rooster), "Rooster", R.raw.roosternoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.sheep), String.valueOf(R.raw.sheep), "Sheep", R.raw.sheepnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.snake), String.valueOf(R.raw.snake), "Snake", R.raw.snakenoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.tiger), String.valueOf(R.raw.tiger), "Tiger", R.raw.tigernoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.fox), String.valueOf(R.raw.fox), "Fox", R.raw.foxnoise + ""));
-            animalCategory.addThing(new Thing(BitmapFactory.decodeResource(context.getResources(), R.drawable.camel), String.valueOf(R.raw.camel), "Camel", R.raw.camelnoise + ""));
-
-            addCategory(animalCategory);
-
-//            foodCategory.addThing(new Thing(R.drawable.bread, R.raw.bread, "Bread"));
-//            foodCategory.addThing(new Thing(R.drawable.burger, R.raw.burger, "Burger"));
-//            foodCategory.addThing(new Thing(R.drawable.cheese, R.raw.cheese, "Cheese"));
-//            foodCategory.addThing(new Thing(R.drawable.chocolate, R.raw.chocolate, "Chocolate"));
-//            foodCategory.addThing(new Thing(R.drawable.coffee, R.raw.coffee, "Coffee"));
-//            foodCategory.addThing(new Thing(R.drawable.egg, R.raw.egg, "Egg"));
-//            foodCategory.addThing(new Thing(R.drawable.honey, R.raw.honey, "Honey"));
-//            foodCategory.addThing(new Thing(R.drawable.hotdog, R.raw.hotdog, "Hot Dog"));
-//            foodCategory.addThing(new Thing(R.drawable.icecream, R.raw.icecream, "Ice Cream"));
-//            foodCategory.addThing(new Thing(R.drawable.meat, R.raw.meat, "Meat"));
-//            foodCategory.addThing(new Thing(R.drawable.pizza, R.raw.pizza, "Pizza"));
-//            foodCategory.addThing(new Thing(R.drawable.sandwich, R.raw.sandwich, "Sandwich"));
-//            foodCategory.addThing(new Thing(R.drawable.sausage, R.raw.sausage, "Sausage"));
-//            foodCategory.addThing(new Thing(R.drawable.water, R.raw.water, "Water"));
-//
-//            colorsCategory.addThing(new Thing(R.drawable.blue, R.raw.blue, "Blue"));
-//            colorsCategory.addThing(new Thing(R.drawable.pink, R.raw.pink, "Pink"));
-//            colorsCategory.addThing(new Thing(R.drawable.green, R.raw.green, "Green"));
-//            colorsCategory.addThing(new Thing(R.drawable.orange_color, R.raw.orange_color, "Orange"));
-//            colorsCategory.addThing(new Thing(R.drawable.purple, R.raw.purple, "Purple"));
-//            colorsCategory.addThing(new Thing(R.drawable.red, R.raw.red, "Red"));
-//            colorsCategory.addThing(new Thing(R.drawable.yellow, R.raw.yellow, "Yellow"));
-//            colorsCategory.addThing(new Thing(R.drawable.brown, R.raw.brown, "Brown"));
-//            colorsCategory.addThing(new Thing(R.drawable.gray, R.raw.gray, "Gray"));
-//            colorsCategory.addThing(new Thing(R.drawable.white, R.raw.white, "White"));
-//            colorsCategory.addThing(new Thing(R.drawable.black, R.raw.black, "Black"));
-
-        }
     }
 
     public int getCategoryCount() {
@@ -248,7 +158,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
             ContentValues values1 = new ContentValues();
             values.put(COLUMN_TEXT, i.getText());
             values.put(COLUMN_IMAGEPATH, i.getImagePath());
-            values.put(COLUMN_CATEGORY_ID, i.getCategoryId());
+            values.put(COLUMN_CATEGORY_ID, category.getId());
 
             db.update(TABLE_THING, values1, COLUMN_CATEGORY_ID + " = ?",
                     new String[]{String.valueOf(category.getId())});
@@ -333,7 +243,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     thing.setId(cursor1.getInt(0));
                     thing.setText(cursor1.getString(1));
                     thing.setImagePath(cursor1.getString(2));
-                    thing.setCategoryId(cursor1.getInt(3));
                     // add to list
                     things.add(thing);
                 } while (cursor1.moveToNext());
@@ -383,7 +292,6 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
                     thing.setId(cursor1.getInt(0));
                     thing.setText(cursor1.getString(1));
                     thing.setImagePath(cursor1.getString(2));
-                    thing.setCategoryId(cursor1.getInt(3));
                     // add to list
                     things.add(thing);
                 } while (cursor1.moveToNext());
@@ -396,27 +304,16 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
         return category;
     }
 
-
-    public int getHighScore(String categoryTitle) {
-        Category category = getCategory(categoryTitle);
-        return category.getHighScore();
-    }
-
-    public void updateHighScore(String categoryTitle, int highscore) {
+    public void updateHighScore(String categoryTitle, int highScore) {
         Category category = getCategory(categoryTitle);
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_HIGHSCORE, highscore);
+        values.put(COLUMN_HIGHSCORE, highScore);
         // updating row
         db.update(TABLE_CATEGORY, values, COLUMN_ID + " = ?",
                 new String[]{String.valueOf(category.getId())});
         db.close();
     }
 
-    public void setHighScore(String categoryTitle, int highScore) {
-        Category category = getCategory(categoryTitle);
-        category.setHighScore(highScore);
-        updateCategory(category);
-    }
 }

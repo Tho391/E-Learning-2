@@ -31,7 +31,9 @@ import java.util.ArrayList;
 import static com.example.dardan.elearning.AddCategoryActivity.CATEGORY;
 import static com.example.dardan.elearning.AddCategoryActivity.RESULT_LOAD_CAMERA;
 import static com.example.dardan.elearning.AddCategoryActivity.RESULT_LOAD_IMG;
-import static com.example.dardan.elearning.Ulti.getDataFromSharePreferences;
+import static com.example.dardan.elearning.Ultis.getDataFromSharePreferences;
+import static com.example.dardan.elearning.Ultis.getUniqueName;
+import static com.example.dardan.elearning.Ultis.saveToInternalStorage;
 
 public class AddThingsActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageButton rightButton;
@@ -65,7 +67,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     private void getCategory() {
 //        Intent intent = getIntent();
 //        category = (Category) intent.getSerializableExtra(CATEGORY);
-        category = new Category(this);
+        category = new Category();
         category = getDataFromSharePreferences(this, CATEGORY);
     }
 
@@ -98,13 +100,15 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
         switch (v.getId()) {
             case R.id.buttonLeftThing:
                 //chuyển đến thing trước đó
-                if (category.prevThing() != null) {
-                    currentThing = category.prevThing();
+                if (currenIndex > 0) {
+                    currenIndex--;
+                    currentThing = category.getThings().get(currenIndex);
                 }
                 break;
             case R.id.buttonRightThing:
-                if (category.nextThing() != null)
-                    currentThing = category.nextThing();
+                if (currenIndex < category.getThings().size()-1)
+                    currenIndex++;
+                    currentThing = category.getThings().get(currenIndex);
                 break;
             case R.id.buttonAudioThing:
                 //todo lấy link âm thanh
@@ -174,9 +178,10 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     private void saveThing() {
         String thingName = this.thingName.getText().toString();
         Bitmap thingImage = ((BitmapDrawable) this.thingImage.getDrawable()).getBitmap();
-        Thing thing = new Thing(thingName, thingImage);
+        String imagePath = saveToInternalStorage(this,thingImage,getUniqueName());
+        Thing thing = new Thing(thingName, imagePath);
         //currentThing = thing;
-        category.things.add(thing);
+        category.getThings().add(thing);
     }
 
     private void resetThingActivity() {
@@ -197,7 +202,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save_category: {
-                if (category.things.size() > 0) {
+                if (category.getThings().size() > 0) {
                     //todo save category
 
                     db.addCategory(category);
@@ -207,7 +212,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
                     finish();
 
                     //deleteSharedPreferences(CATEGORY);
-                    Toast.makeText(this, category.title + " category added", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, category.getTitle() + " category added", Toast.LENGTH_LONG).show();
                 } else
                     Toast.makeText(this, "You have not add any objects!", Toast.LENGTH_LONG).show();
             }
